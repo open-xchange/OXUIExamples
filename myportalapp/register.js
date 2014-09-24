@@ -23,6 +23,9 @@ define('myportalapp/register', ['io.ox/core/extensions'], function (ext) {
     });
 
     ext.point('io.ox/portal/widget/myPortalApp').extend({
+	
+		title: 'Custom Portal Widget',
+	
 		preview: function () {
             var content = $('<div class="content">').text('My first portal widget.');
             this.append(content);

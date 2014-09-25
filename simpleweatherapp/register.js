@@ -17,8 +17,6 @@
   http://simpleweatherjs.com
   
 */
-
-
 // Here we register this file and we make sure that we load also the jquery.simpleWeather.min.js file!
 define('simpleweatherapp/register', ['io.ox/core/extensions', 'simpleweatherapp/jquery.simpleWeather.min'], function (ext) {
 
@@ -73,3 +71,7 @@ define('simpleweatherapp/register', ['io.ox/core/extensions', 'simpleweatherapp/
 
 });
 
+// Here we define the jquery.simpleWeather.min.js file itself to make sure we can load it afterwards.
+define('simpleweatherapp/jquery.simpleWeather.min', function () {
+	console.log('loading jquery.simpleWeather.min.js');
+});

@@ -4,6 +4,8 @@
   Please note that you have to click the "Add widget" button on the portal
   page and add the "Simple Weather App" in order to show it.
   
+  You can now configure this widget within the portal settings 
+  
   More info:
   
   http://oxpedia.org/wiki/index.php?title=AppSuite:Writing_a_portal_plugin 
@@ -18,10 +20,15 @@
   
 */
 
-// Here we register this file and we make sure jquery.simpleWeather.min.js is a dependency!
-define('simpleweatherapp/register', ['io.ox/core/extensions', 'simpleweatherapp/jquery.simpleWeather.min'], function (ext) {
+// Here we register this file and load our dependencies
+define('simpleweatherapp/register', [
+	'io.ox/core/extensions',
+    'io.ox/core/tk/dialogs',
+    'settings!io.ox/portal',
+	'simpleweatherapp/jquery.simpleWeather.min'
+	], function (ext, dialogs) {
 
- 'use strict';
+	'use strict';
 	
     ext.point('io.ox/portal/widget').extend({
         id: 'simpleweatherapp'
@@ -30,8 +37,14 @@ define('simpleweatherapp/register', ['io.ox/core/extensions', 'simpleweatherapp/
     ext.point('io.ox/portal/widget/simpleweatherapp').extend({
 	
 		title: 'Simple Weather App',
-	
-		preview: function () {
+		
+		preview: function (baton) {
+		
+			// load the custom location stored in the settings
+		    var config_location = baton.model.get('props').location;
+			if (config_location === undefined || config_location.length === 0) {
+				config_location = 'Olpe, NRW'; // This is our standard location settings!
+			}
 		
 			// The next line defines our playground for both, the OX UI (cöass) and the simpleWeather API (id)
 			var content = $('<div id=\'weather_widget\' class=\'content\'></div>');
@@ -47,7 +60,7 @@ define('simpleweatherapp/register', ['io.ox/core/extensions', 'simpleweatherapp/
 			document.getElementsByTagName('head')[0].appendChild(style);
 		
 			$.simpleWeather({
-				location: 'Olpe, NRW', // hardcoded at the moment, feel free to make this configurable or we do this in the next steps :)
+				location: config_location,
 				woeid: '',
 				unit: 'f',
 				success: function(weather) {
@@ -63,14 +76,71 @@ define('simpleweatherapp/register', ['io.ox/core/extensions', 'simpleweatherapp/
 		
     });
 
-	// This section makes sure that our widget is available in the settings
+	// This function manages our settings
+    function edit(model, view) {
+	
+		// the dialog is a helper class for modal dialogs
+        var dialog = new dialogs.ModalDialog({ async: true, width: 400 }),
+            $location = $('<input id="simpleweatherapp_location" type="text" class="form-control">'),
+            $error = $('<div>').addClass('alert alert-danger').css('margin-top', '15px').hide(),
+            props = model.get('props') || {};
+
+			
+		// set the header and add our custom location field	
+        dialog.header($('<h4>').text('Where are you?'))
+            .build(function () {
+                this.getContentNode().append(
+                    $('<div class="row">').append(
+                        $('<div class="col-sm-12">').append(
+                            $('<label for="simpleweatherapp_location">').text('Location'),
+                            $location.val(props.location) // props.location now contains our custom location and in case we have already an location we fill the value of the text field
+                        )
+                    )
+                );
+            })
+            .addPrimaryButton('save', 'Save')
+            .addButton('cancel', 'Cancel')
+            .show(function () {
+                $location.focus();
+            });
+
+        dialog.on('cancel', function () {
+            if (model.has('candidate')) {
+                view.removeWidget();
+            }
+        });
+
+		// If the users saves our settings we check for errors but currently the error does not show up!
+        dialog.on('save', function () {
+			
+            $error.hide();
+			
+            var location = String($.trim($location.val()));
+
+            if (location.length === 0) {
+				$error.text('Please enter a location');
+				$error.show();
+				dialog.idle();
+            } else {
+                    props = { location: location };
+                    model.set({ props: props }, {validate: true});
+                    model.unset('candidate');
+                    dialog.close();
+            }
+    
+            return; 
+        });
+    }
+
+	// This section makes sure that our widget is available in the Portal settings and has custom settings as well
     ext.point('io.ox/portal/widget/simpleweatherapp/settings').extend({
         title: 'Simple Weather Widget',
         type: 'simpleweatherapp',
-		unique: true
+		unique: true,
+		editable: true,
+        edit: edit
     });
 	
-
 });
 
 // Here we define the jquery.simpleWeather.min.js file itself to make sure we can use it afterwards.

@@ -1,25 +1,25 @@
 define('helloworld/app/main', ['io.ox/core/extensions'], function () {
 
-    'use strict';
+	'use strict';
 
-    var app = ox.ui.createApp({
-        name: 'helloworld/app',
-        title: 'Hello World App' // Can't be empty! This title appears if the user clicks on the App Launcher so it should be the same like in the manifest.json file
-    });
+	var app = ox.ui.createApp({
+		name: 'helloworld/app',
+		title: 'Hello World App' // Can't be empty! This title appears if the user clicks on the App Launcher so it should be the same like in the manifest.json file
+	});
 
-    app.setLauncher(function () {
+	app.setLauncher(function () {
 
 		console.log('hello world launcher init ...');
 
-        var win = ox.ui.createWindow({
-            name: 'helloworld/app'
-        });
-        app.setWindow(win);
+		var win = ox.ui.createWindow({
+			name: 'helloworld/app'
+		});
+		app.setWindow(win);
 
 		/*
 			Acquire Token for external service to create a valid session for service authentication.
 
- 			More details:
+			More details:
 			http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22token.22_.28since_7.4.0.29
 		*/
 
@@ -35,23 +35,27 @@ define('helloworld/app/main', ['io.ox/core/extensions'], function () {
 		  });
 		});
 
-    });
+	});
 
-    return { getApp: app.getInstance };
+	return { getApp: app.getInstance };
 
 });
 
 function init_window_and_show(win, access_token) {
-	var content =   $('<iframe>', { src: 'https://dev.ox.io/helloworld-app-service/?ox_token='+access_token, frameborder: 0 });
-	content.css({
+	var ox_domain = 'https://dev.ox.io/helloworld-app-service/';
+	var iframe =   $('<iframe>', { src: ox_domain, frameborder: 0 });
+	iframe.css({
 		width: '100%',
 		height: '100%'
 	});
 
-	win.nodes.main.append(content);
+	win.nodes.main.append(iframe);
 
-	console.log('... done');
+	var url_with_ox_token = ox_domain + '?ox_token='+access_token;
+	iframe.attr('src', url_with_ox_token);
 
 	win.show();
+
+	console.log('... done');
 }
 

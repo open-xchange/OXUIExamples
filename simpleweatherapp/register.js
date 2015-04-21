@@ -6,10 +6,6 @@
   
   More info:
   
-  http://oxpedia.org/wiki/index.php?title=AppSuite:Writing_a_portal_plugin 
-  
-  and  
-  
   https://dev.ox.io
   
   and 
@@ -33,11 +29,11 @@ define('simpleweatherapp/register', ['io.ox/core/extensions', 'simpleweatherapp/
 	
 		preview: function () {
 		
-			// The next line defines our playground for both, the OX UI (cöass) and the simpleWeather API (id)
+			// The next line defines our playground for both, the OX UI (class) and the simpleWeather API (id)
 			var content = $('<div id=\'weather_widget\' class=\'content\'></div>');
 			this.append(content);
 			
-			// ugly hack, would be better the widgets itself could be initialed with a background color
+			// ugly hack, would be better if the widgets itself could be initialized with a background color
 			$('#weather_widget').css('background-color', '#1192d3');
 
 			// This adds dynamically the necessary styles to our widget
